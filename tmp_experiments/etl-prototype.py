@@ -4,11 +4,11 @@ import sqlite3
 from sqlalchemy import create_engine
 
 # load messages dataset
-messages = pd.read_csv("data/messages.csv")
+messages = pd.read_csv("tmp_experiments/data/messages.csv")
 messages.head()
 
 # Load categories dataset
-categories = pd.read_csv("data/categories.csv")
+categories = pd.read_csv("tmp_experiments/data/categories.csv")
 categories.head()
 
 # Merge datasets.
@@ -30,15 +30,13 @@ category_counts = categories["categories"].str.split(";").str.len()
 print(f"Max. number of categories: {category_counts.max()}. Min. number of categories: {category_counts.min()}")
 
 # Create a dataframe of the 36 individual category columns
-categories = categories["categories"].str.split(";", expand=True)
+categories = df["categories"].str.split(";", expand=True)
 categories.head()
 
-# Select the first row of the categories dataframe
-row = categories.iloc[0, :]
-
-# Use this row to extract a list of new column names for categories.
+# Use the first row to extract the name of each category.
 # one way is to apply a lambda function that takes everything
 # up to the second to last character of each string with slicing
+row = categories.iloc[0, :]
 category_colnames = row.apply(lambda e: e[:-2])
 print(category_colnames[0:10])
 
