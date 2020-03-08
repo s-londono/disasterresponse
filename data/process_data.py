@@ -1,7 +1,6 @@
 import sys
 import pandas as pd
 import numpy as np
-import sqlite3
 from sqlalchemy import create_engine
 
 
@@ -45,11 +44,29 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    pass
+    """
+    Cleans the DataFrame of categorized messages. That is removes missing data, useless columns and records
+    :param df: DataFrame of categorized messages to be cleaned
+    :return: Clean DataFrame of categorized messages
+    """
+    # Drop messages with no classification
+    df_clean = df.dropna(how="all", subset=df.columns[4:])
+
+    # Drop duplicated messages
+    print(f"Dropping a total of: {df.duplicated()} messages")
+    df_clean.drop_duplicates(inplace=True)
+
+    return df_clean
 
 
 def save_data(df, database_filename):
-    pass  
+    """
+    Stores the DataFrame of messages in a database at the path specified
+    :param df: DataFrame of categorized messages to be stored in a database
+    :param database_filename: Path to the database file
+    """
+    db_engine = create_engine(f"sqlite:///{database_filename}")
+    df.to_sql("Message", db_engine, index=False, if_exists="replace")
 
 
 def main():
@@ -62,19 +79,19 @@ def main():
         print("Cleaning data...")
         df = clean_data(df)
         
-        print('Saving data...\n    DATABASE: {}'.format(database_filepath))
+        print(f"Saving data...\n    DATABASE: {database_filepath}")
         save_data(df, database_filepath)
         
-        print('Cleaned data saved to database!')
+        print("Cleaned data saved to database!")
     
     else:
-        print('Please provide the filepaths of the messages and categories '\
-              'datasets as the first and second argument respectively, as '\
-              'well as the filepath of the database to save the cleaned data '\
-              'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
-              'DisasterResponse.db')
+        print(f"Please provide the filepaths of the messages and categories "
+              f"datasets as the first and second argument respectively, as "
+              f"well as the filepath of the database to save the cleaned data ",
+              f"to as the third argument. \n\nExample: python process_data.py "
+              f"disaster_messages.csv disaster_categories.csv "
+              f"DisasterResponse.db")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
