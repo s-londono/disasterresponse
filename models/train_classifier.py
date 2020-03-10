@@ -1,8 +1,17 @@
 import re
 import sys
+import pickle
+import pandas as pd
+from sqlalchemy import create_engine
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
 
 # Regex to match URLs
 url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
@@ -21,10 +30,14 @@ def load_data(database_filepath):
              X: Numpy array, messages loaded from the Message table
              Y:
     """
-    engine = create_engine("sqlite:///tmp_experiments/data/DisasterResponse.db")
+    engine = create_engine(f"sqlite:///{database_filepath}")
     df_messages = pd.read_sql_table("Message", engine)
 
+    X = df_messages["message"].values
+    Y = df_messages.iloc[:, 4:].values
+    categories = [str(category_name) for category_name in df_messages.iloc[0, 4:].index]
 
+    return X, Y, categories
 
 
 def tokenize(text):
@@ -46,18 +59,36 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Builds a pipelined, supervised classification model. The resulting model receives a set of categorized text pieces
+    and their corresponding categories as training input. Afterwards, the trained model predicts the category of a
+    new piece of text. Note that the model automatically tokenizes and vectorizes the input text.
+    The parameters of the model were tunned using GridSearchCV
+    :return: Text classification model to predict the category of raw pieces of text
+    """
+    # Classifier to predict categories based on the vectorized text
+    random_forest_clsfr = RandomForestClassifier(criterion="entropy", max_depth=50, n_estimators=100)
+
     # We have a multiple classifications per input text, that is, we have a two-dimensional target variable.
     # Use the MultiOutputClassifier to train a different Classifier per target variable
     clsfr = Pipeline([
         ("vctzr", CountVectorizer(tokenizer=tokenize)),
-        ("tfidf", TfidfTransformer(use_idf=True, smooth_idf=False)),
-        ("clsfr", MultiOutputClassifier(RandomForestClassifier(criterion="entropy", max_depth=20, n_estimators=50)))
+        ("tfidf", TfidfTransformer(use_idf=True, smooth_idf=True)),
+        ("clsfr", MultiOutputClassifier(random_forest_clsfr))
     ])
 
     return clsfr
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Computes metrics such as precision, recall, accuracy and f-score on the specified model and test dataset
+    :param model: Model to be evaluated
+    :param X_test: Test dataset. Independent variables
+    :param Y_test: Test dataset. Dependent variables
+    :param category_names: Array containing the names of the dependent variables
+    :return: Nothing just prints out the results
+    """
     # Predict categories on the test dataset
     Y_pred = model.predict(X_test)
 
@@ -73,7 +104,14 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    pass
+    """
+    Stores the trained model in a pickle file, at the specified location
+    :param model: Model to be saved
+    :param model_filepath: Path to write the pickle file to
+    :return: Nothing
+    """
+    with open(model_filepath, mode="wb") as pickle_file:
+        pickle.dump(model, pickle_file)
 
 
 def main():

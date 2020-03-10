@@ -134,3 +134,5 @@ dmypy.json
 # Ignore downloaded datasets
 datasets/
 
+# Ignore pickled models, which are huge
+models/*.pickle

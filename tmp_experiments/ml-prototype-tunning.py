@@ -43,6 +43,7 @@ for column in df.columns[4:]:
 
 X = df["message"].values
 Y = df.iloc[:, 4:].values
+categories = [str(category_name) for category_name in df.iloc[0, 4:].index]
 
 
 def tokenize(text):
