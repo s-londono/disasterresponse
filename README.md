@@ -12,3 +12,9 @@
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+Make sure to download:
+
+- nltk.download('stopwords')
+- nltk.download('wordnet')
+- nltk.download('punkt')

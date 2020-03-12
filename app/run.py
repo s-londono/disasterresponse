@@ -1,86 +1,83 @@
 import json
+import re
 import plotly
+import joblib
 import pandas as pd
-
-from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
 from sqlalchemy import create_engine
-
+from visualization import PlotBuilder
 
 app = Flask(__name__)
 
+# Regex to match URLs
+url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+
+# Lemmatizer based on the WordNet corpus
+lemmatzr = WordNetLemmatizer()
+
+stopwords = stopwords.words("english")
+
+
 def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
+    """
+    Cleans, normalizes and converts the text into an array of lemmatized tokens
+    :text: Piece to be tokenized
+    :return: List of tokens corresponding to the lemmatized words of the text
+    """
+    # Replace URLs with a fixed placeholder
+    clean_text = re.sub(url_regex, "urlplaceholder", text)
 
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
+    # Make the text all lowercase and clean it of any remaining special characters
+    clean_text = re.sub(r"[^0-9a-zA-Z]", " ", clean_text.lower())
 
-    return clean_tokens
+    # Convert the text into a list of tokens, each corresponding to a word and remove heading and trailing spaces
+    word_tokens = [word.strip() for word in word_tokenize(clean_text)]
 
-# load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
-
-# load model
-model = joblib.load("../models/your_model_name.pkl")
+    return [lemmatzr.lemmatize(word) for word in word_tokens if word not in stopwords]
 
 
-# index webpage displays cool visuals and receives user input text for model
+# Load data
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('Message', engine)
+
+# Instantiate a PlotBuilder and set the datasource to generate plots
+plot_builder = PlotBuilder(df)
+
+# Load model
+model = joblib.load("../models/classifier.pkl")
+
+
+# Index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
-    
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
-    
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+    # Create visuals by using the PlotBuilder
     graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
+        plot_builder.build_genre_totals_bar(),
+        plot_builder.build_category_totals_bar(),
+        plot_builder.build_message_length_box()
     ]
     
-    # encode plotly graphs in JSON
+    # Encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
     
-    # render web page with plotly graphs
+    # Render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
 
-# web page that handles user query and displays model results
+# Web page that handles user query and displays model results
 @app.route('/go')
 def go():
-    # save user input in query
+    # Save user input in query
     query = request.args.get('query', '') 
 
-    # use model to predict classification for query
+    # Use model to predict classification for query
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 

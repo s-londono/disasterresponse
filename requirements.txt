@@ -1,0 +1,6 @@
+nltk
+pandas
+flask
+sqlalchemy
+joblib
+plotly

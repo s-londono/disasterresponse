@@ -136,3 +136,4 @@ datasets/
 
 # Ignore pickled models, which are huge
 models/*.pickle
+models/*.pkl
