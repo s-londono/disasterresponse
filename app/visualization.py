@@ -70,22 +70,16 @@ class PlotBuilder:
         Creates a bar plot of the total number of messages in each category
         :return: Object defining the plot, in Plotly format
         """
-        y0 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        y1 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        boxes = []
+
+        for genre in self.df["genre"].unique():
+            category_message_lengths = self.df[self.df['genre'] == genre]['message'].apply(len).values
+            boxes.append(Box(x=category_message_lengths, name=genre))
 
         return {
-            'data': [
-                Box(
-                    x=y0,
-                    name='One'
-                ),
-                Box(
-                    x=y1,
-                    name='Two'
-                )
-            ],
+            'data': boxes,
             'layout': {
-                'title': 'Total Messages per Category',
+                'title': 'Distribution of Message Lengths per Genre',
                 'xaxis': {
                     'title': "Message Length"
                 }
