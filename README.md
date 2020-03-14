@@ -32,6 +32,34 @@ give basic overview of the training data.
 
 #### Project structure
 
+The source code is organized in three folders:
+
+- Data: 
+
+Contains the dataset of messages and categories that was used to train and test the model. 
+Most importantly, it contains the script process_data.py, which extracts, cleans and merges the messages 
+and categories provided in separate CSV files. Then, it loads the results into an SQLite database at 
+the specified path. 
+
+This script can be invoked by running the following command in the project's root directory:
+
+```bash
+python data/process_data.py MESSAGES_CSV_PATH CATEGORIES_CSV_PATH TARGET_DB_PATH
+```
+
+Arguments MESSAGES_CSV_PATH and CATEGORIES_CSV_PATH are the paths of the CSV files containing messages and categories, 
+respectively. Argument TARGET_DB_PATH specifies the path where the script will write the resulting database. 
+For example, to load the datasets provided in the project run:
+
+```bash
+python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db
+```
+
+- Models:
+
+
+
+
 
 
 ### Instructions:
