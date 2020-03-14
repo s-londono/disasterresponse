@@ -12,11 +12,26 @@ The purpose of this project is to build a model to classify text messages in a p
 This classification should help in determining the type of information contained in the message and the organization 
 that is better qualified to respond.
 
+#### Methodology
+
 With this idea in mind, we built and trained a supervised classification model using 
 [Random Forests](https://en.wikipedia.org/wiki/Random_forest). We trained the model on a real dataset of 
 categorized texts, provided by [Figure Eight](https://www.figure-eight.com/). After cleaning and normalizing the 
 dataset, we used [Count Vectorization](https://en.wikipedia.org/wiki/Bag-of-words_model) and 
 [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) to transform the messages into numerical features.
+
+We tunned the parameters of the model by using ScikitLearn's 
+[GridSearchCV](https://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search). 
+This utility performs an exhaustive exploration of a specific set (grid) of parameter values. 
+It finds the combination of parameters that yields the best results by applying 
+[Cross Validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics).
+
+As a final result, we assembled a web application that provides access to the model. This application allows 
+users to predict the categories associated with a text message entered by the user. It displays some plots that
+give basic overview of the training data.
+
+#### Project structure
+
 
 
 ### Instructions:
