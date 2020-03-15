@@ -42,14 +42,14 @@ def tokenize(text):
 
 
 # Load data
-engine = create_engine('sqlite:///../data/DisasterResponse.db')
+engine = create_engine('sqlite:///data/DisasterResponse.db')
 df = pd.read_sql_table('Message', engine)
 
 # Instantiate a PlotBuilder and set the datasource to generate plots
 plot_builder = PlotBuilder(df)
 
 # Load model
-model = joblib.load("../models/classifier.pkl")
+model = joblib.load("models/classifier.pkl")
 
 
 # Index webpage displays cool visuals and receives user input text for model

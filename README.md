@@ -95,8 +95,11 @@ user's requests. Plots are built by the helper class PlotBuilder, defined in the
 We implemented each plot in its own method of the class PlotBuilder, as a Python dictionary in 
 [Plotly Python](https://plot.ly/python/) format.
 
+To start the web application, go to the project's root directory and run:
 
-
+```bash
+python app/run.py 
+```
 
 
 
