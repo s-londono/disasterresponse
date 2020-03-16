@@ -8,7 +8,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report
@@ -66,15 +66,15 @@ def build_model():
     The parameters of the model were tunned using GridSearchCV
     :return: Text classification model to predict the category of raw pieces of text
     """
-    # Classifier to predict categories based on the vectorized text
-    random_forest_clsfr = RandomForestClassifier(criterion="entropy", max_depth=50, n_estimators=100)
+    # Classifier to predict categories based on the vectorized text. The default kernel function of the SVC is RBF
+    svc = SVC(class_weight="balanced", gamma="scale")
 
     # We have a multiple classifications per input text, that is, we have a two-dimensional target variable.
     # Use the MultiOutputClassifier to train a different Classifier per target variable
     clsfr = Pipeline([
         ("vctzr", CountVectorizer(tokenizer=tokenize)),
         ("tfidf", TfidfTransformer(use_idf=True, smooth_idf=True)),
-        ("clsfr", MultiOutputClassifier(random_forest_clsfr))
+        ("clsfr", MultiOutputClassifier(svc))
     ])
 
     return clsfr
@@ -101,6 +101,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
         print(f"- {category}: \n\n{cur_category_report}\n")
 
     print("-----------------------------------------------------------------------------------------------------------")
+
+    # Compute mean accuracy over all categories
+    print(f"\nMEAN ACCURACY: {model.score(X_test, Y_test)}\n")
 
 
 def save_model(model, model_filepath):
