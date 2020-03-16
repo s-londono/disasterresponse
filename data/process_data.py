@@ -52,6 +52,10 @@ def clean_data(df):
     # Drop messages with no classification
     df_clean = df.dropna(how="all", subset=df.columns[4:])
 
+    # Drop categories that have a single value
+    single_valued_cols = [column for column, num_vals in df_clean.iloc[:, 4:].nunique().iteritems() if num_vals <= 1]
+    df_clean.drop(labels=single_valued_cols, axis=1, inplace=True)
+
     # Drop duplicated messages
     print(f"Dropping a total of: {df.duplicated()} messages")
     df_clean.drop_duplicates(inplace=True)
