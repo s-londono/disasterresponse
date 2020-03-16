@@ -61,6 +61,34 @@ As a final result, we assembled a web application that provides access to the mo
 users to predict the categories associated with a text message entered by the user. It displays some plots that
 give basic overview of the training data.
 
+### Dependencies and Setup
+
+This project requires Python 3.6 or above. It has the following dependencies:
+
+- [Numpy](https://numpy.org/).
+- [Pandas](https://pandas.pydata.org/).
+- [NLTK](https://www.nltk.org/).
+- [Flask](https://palletsprojects.com/p/flask/).
+- [SQLAlchemy](https://www.sqlalchemy.org/).
+- [Joblib](https://joblib.readthedocs.io/en/latest/).
+- [Plotly](https://plot.ly/python/).
+
+All the dependencies are listed in the `requirements.txt` file, so you can install them at once by running:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then, make sure to download NLTK's modules by running the following script in your Python environment:
+
+```python
+import nltk
+
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt')
+```
+
 ### Project structure
 
 The source code is organized in three folders:
@@ -105,6 +133,8 @@ For example, to load the messages saved above run:
 python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
 ```
 
+Training the model may take a while (we are talking about 30 minutes), so please be patient.
+
 We used ScikitLearn's GridSearchCV to find the parameters of the model that gave us the best results. The is 
 implemented in the script `tune_classifier.py`, which can be invoked with the path of the messages database as 
 argument:
@@ -144,24 +174,13 @@ To start the web application, go to the project's root directory and run:
 python app/run.py 
 ```
 
+In your favorite browser, go to `http://0.0.0.0:3001/` to access the web application.
 
+The home page displays summarizes the training data using chats.
 
-### Instructions:
-1. Run the following commands in the project's root directory to set up your database and model.
+![Home page](images/homepage.png)
 
-    - To run ETL pipeline that cleans data and stores in database
-        `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
-    - To run ML pipeline that trains classifier and saves
-        `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
+To classify a text message, write it in the input field and click the 'Classify Message' button. You will se a list 
+of the categories estimated by the model as associated with the message.
 
-2. Run the following command in the app's directory to run your web app.
-    `python run.py`
-
-3. Go to http://0.0.0.0:3001/
-
-Make sure to download:
-
-- nltk.download('stopwords')
-- nltk.download('wordnet')
-- nltk.download('punkt')
-
+![Classify text message](images/classify-text.png) 
