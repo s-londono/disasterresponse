@@ -9,15 +9,15 @@ they could even make the difference between life and death. But reading and clas
 order to forward it to the appropriate organization, would be a daunting task.
 
 The purpose of this project is to build a model to classify text messages in a pre-defined set of categories. 
-This classification should help in determining the type of information contained in the message and the organization 
-that is better qualified to respond.
+This classification may prove valuable in determining the type of information contained in the message and the 
+organization that is better qualified to respond.
 
 ### Methodology
 
 With this idea in mind, we built and trained a supervised classification model using 
-[Random Forests](https://en.wikipedia.org/wiki/Random_forest). We trained the model on a real dataset of 
-categorized texts, provided by [Figure Eight](https://www.figure-eight.com/). The resulting model can be used 
-by operators to estimate the categories associated with a new text message.
+[Support Vector Classifiers](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html). 
+We trained the model on a real dataset of categorized texts, provided by [Figure Eight](https://www.figure-eight.com/). 
+The resulting model can be used by operators to estimate the categories associated with a new text message.
 
 #### Data cleaning
 
@@ -25,8 +25,8 @@ The data contained some messages not associated with any categories. Those non-c
 for training the model, so we removed them. We also removed duplicate records. 
 
 We looked for single-valued columns and dropped them, as they didn't provide any useful information for 
-classifying the messages. In the data provided with the project we found that the category column *alone_child* 
-was the only single-valued column and hence, we dropped it.
+classifying messages. In the data provided with the project, we found that the category column *alone_child* 
+was the only single-valued one and hence, we dropped it.
 
 #### Feature extraction
 
@@ -36,30 +36,30 @@ and [WordNetLemmatizer](https://www.nltk.org/_modules/nltk/stem/wordnet.html) to
 of lemmas. 
 
 Subsequently we used [Count Vectorization](https://en.wikipedia.org/wiki/Bag-of-words_model) and 
-[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) to transform the messages into numerical features.
+[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) to transform the messages into numerical vectors.
 
 #### Model selection
 
-When implementing the model, we tried tree types of classifiers: 
+When implementing the model, we evaluated tree types of classifiers: 
 [Random Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html), 
 [Linear Support Vector Classifier](https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html#sklearn.svm.LinearSVC)
 and [RBF Support Vector Classifier](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html). 
 
-We tunned the parameters of each type of classifier by using ScikitLearn's 
+We tunned the parameters of each one of those classifiers by using ScikitLearn's 
 [GridSearchCV](https://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search). 
 This utility performs an exhaustive exploration of a specific set (grid) of parameter values. 
-It finds the combination of parameters that yields the best results by applying 
+It finds the combination of parameters that yield the best results by applying 
 [Cross Validation](https://en.wikipedia.org/wiki/Cross-validation_(statistics).
 
-The best accuracy we obtained, resulted from using an [RBF SVC](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html), 
+The best accuracy we obtained resulted from using an [RBF SVC](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html), 
 with the parameters set in the `build_model` function of the script `model/train_classifier.py`. We provide further 
 details about how to evaluate different models in the next section.
 
 #### Results
 
-As a final result, we assembled a web application that provides access to the model. This application allows 
+As a final result, we assembled a web application that gives access to the model. This application allows 
 users to predict the categories associated with a text message entered by the user. It displays some plots that
-give basic overview of the training data.
+give a basic overview of the training data.
 
 ### Dependencies and Setup
 
@@ -117,9 +117,9 @@ python data/process_data.py data/disaster_messages.csv data/disaster_categories.
 - Models:
 
 The script `train_classifier.py` builds and trains the classification model on the database of messages. It expects 
-as argument the database of messages, previously created by `process_data.py`. The model, trained and ready to use for 
-prediction, will be saved as a pickle file at the path specified by the second argument. To invoke this script, go to 
-the project's root directory and run:
+as argument, the path to the database of messages, previously created by `process_data.py`. The model, trained and 
+ready to use for prediction, will be saved as a pickle file at the path specified by the second argument. 
+To invoke this script, go to the project's root directory and run:
 
 ```bash
 python models/train_classifier.py MESSAGES_DB_PATH MODEL_PICKLE_PATH
@@ -127,7 +127,7 @@ python models/train_classifier.py MESSAGES_DB_PATH MODEL_PICKLE_PATH
 
 The first argument, MESSAGES_DB_PATH should be the path to the messages database. The second argument, 
 MODEL_PICKLE_PATH, specifies the path where the model is to be saved as a pickle file.
-For example, to load the messages saved above run:
+For example, to load the messages database saved above to train the model, run:
 
 ```bash
 python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
@@ -135,9 +135,9 @@ python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl
 
 Training the model may take a while (we are talking about 30 minutes), so please be patient.
 
-We used ScikitLearn's GridSearchCV to find the parameters of the model that gave us the best results. The is 
-implemented in the script `tune_classifier.py`, which can be invoked with the path of the messages database as 
-argument:
+We used ScikitLearn's [GridSearchCV](https://scikit-learn.org/stable/modules/grid_search.html#exhaustive-grid-search) 
+to find the parameters of the model that gave us the best results. This is implemented in the script 
+`tune_classifier.py`, which can be invoked with the path of the messages database as argument:
 
 ```bash
 python models/tune_classifier.py data/DisasterResponse.db
@@ -151,7 +151,7 @@ function with your model and your grid of parameters.
 
 - App:
 
-This is a web application that allows non-technical users to classify text messages with the model. It also 
+This is a web application that allows non-technical users to classify text messages through the model. It also 
 displays some charts giving an overview of the training data. The application was implemented using 
 [Flask](https://palletsprojects.com/p/flask/) and [Plotly Python](https://plot.ly/python/).   
 
@@ -176,11 +176,11 @@ python app/run.py
 
 In your favorite browser, go to `http://0.0.0.0:3001/` to access the web application.
 
-The home page displays summarizes the training data using chats.
+The home page summarizes the training data by displaying some charts.
 
 ![Home page](images/homepage.png)
 
-To classify a text message, write it in the input field and click the 'Classify Message' button. You will se a list 
+To classify a text message, write it in the input field and click the 'Classify Message' button. You will see a list 
 of the categories estimated by the model as associated with the message.
 
 ![Classify text message](images/classify-text.png) 
